@@ -25,6 +25,11 @@ from .const import (
     CONF_SOLAR_CHARGING_CONFIGURED,
     DOMAIN,
     CONF_CHARGING_TIME_ENTITY,
+    PLATFORM_ENERGIDATASERVICE,
+    PLATFORM_ENTSOE,
+    PLATFORM_GENERIC,
+    PLATFORM_NORDPOOL,
+    PLATFORM_TGE,
 )
 from .helpers.config_flow import DeviceNameCreator, FindEntity, FlowValidator
 from .helpers.general import get_parameter
@@ -97,13 +102,28 @@ class EVSmartChargingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ): cv.string,
             vol.Required(
                 CONF_PRICE_SENSOR, default=user_input[CONF_PRICE_SENSOR]
-            ): cv.string,
+            ): EntitySelector(EntitySelectorConfig(
+                filter=EntityFilterSelectorConfig(
+                    device_class=SensorDeviceClass.MONETARY,
+                    domain=[
+                        'pstryk',
+                        PLATFORM_NORDPOOL,
+                        PLATFORM_TGE,
+                        PLATFORM_ENTSOE,
+                        PLATFORM_ENERGIDATASERVICE,
+                    ]
+                )
+            )),
             vol.Required(
                 CONF_EV_SOC_SENSOR, default=user_input[CONF_EV_SOC_SENSOR]
-            ): cv.string,
+            ): EntitySelector(EntitySelectorConfig(
+                filter=EntityFilterSelectorConfig(
+                    device_class=SensorDeviceClass.BATTERY,
+                )
+            )),
             vol.Optional(
                 CONF_EV_TARGET_SOC_SENSOR, default=user_input[CONF_EV_TARGET_SOC_SENSOR]
-            ): cv.string,
+            ): EntitySelector(EntitySelectorConfig()),
             vol.Optional(
                 CONF_CHARGER_ENTITY, default=user_input[CONF_CHARGER_ENTITY]
             ): cv.string,
@@ -154,15 +174,30 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             vol.Required(
                 CONF_PRICE_SENSOR,
                 default=get_parameter(self.config_entry, CONF_PRICE_SENSOR),
-            ): cv.string,
+            ): EntitySelector(EntitySelectorConfig(
+                filter=EntityFilterSelectorConfig(
+                    device_class=SensorDeviceClass.MONETARY,
+                    domain=[
+                        'pstryk',
+                        PLATFORM_NORDPOOL,
+                        PLATFORM_TGE,
+                        PLATFORM_ENTSOE,
+                        PLATFORM_ENERGIDATASERVICE,
+                    ]
+                )
+            )),
             vol.Required(
                 CONF_EV_SOC_SENSOR,
                 default=get_parameter(self.config_entry, CONF_EV_SOC_SENSOR),
-            ): cv.string,
+            ): EntitySelector(EntitySelectorConfig(
+                filter=EntityFilterSelectorConfig(
+                    device_class=SensorDeviceClass.BATTERY,
+                )
+            )),
             vol.Optional(
                 CONF_EV_TARGET_SOC_SENSOR,
                 default=get_parameter(self.config_entry, CONF_EV_TARGET_SOC_SENSOR),
-            ): cv.string,
+            ): EntitySelector(EntitySelectorConfig()),
             vol.Optional(
                 CONF_CHARGER_ENTITY,
                 default=get_parameter(self.config_entry, CONF_CHARGER_ENTITY),
